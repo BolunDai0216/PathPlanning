@@ -3,17 +3,19 @@ INFORMED_RRT_STAR 2D
 @author: huiming zhou
 """
 
-import os
-import sys
 import math
+import os
 import random
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.spatial.transform import Rotation as Rot
-import matplotlib.patches as patches
+import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial.transform import Rotation as Rot
+
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
 from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
@@ -26,8 +28,9 @@ class Node:
 
 
 class IRrtStar:
-    def __init__(self, x_start, x_goal, step_len,
-                 goal_sample_rate, search_radius, iter_max):
+    def __init__(
+        self, x_start, x_goal, step_len, goal_sample_rate, search_radius, iter_max
+    ):
         self.x_start = Node(x_start)
         self.x_goal = Node(x_goal)
         self.step_len = step_len
@@ -54,8 +57,13 @@ class IRrtStar:
     def init(self):
         cMin, theta = self.get_distance_and_angle(self.x_start, self.x_goal)
         C = self.RotationToWorldFrame(self.x_start, self.x_goal, cMin)
-        xCenter = np.array([[(self.x_start.x + self.x_goal.x) / 2.0],
-                            [(self.x_start.y + self.x_goal.y) / 2.0], [0.0]])
+        xCenter = np.array(
+            [
+                [(self.x_start.x + self.x_goal.x) / 2.0],
+                [(self.x_start.y + self.x_goal.y) / 2.0],
+                [0.0],
+            ]
+        )
         x_best = self.x_start
 
         return theta, cMin, xCenter, C, x_best
@@ -106,15 +114,16 @@ class IRrtStar:
 
         self.path = self.ExtractPath(x_best)
         self.animation(x_center=x_center, c_best=c_best, dist=dist, theta=theta)
-        plt.plot([x for x, _ in self.path], [y for _, y in self.path], '-r')
+        plt.plot([x for x, _ in self.path], [y for _, y in self.path], "-r")
         plt.pause(0.01)
         plt.show()
 
     def Steer(self, x_start, x_goal):
         dist, theta = self.get_distance_and_angle(x_start, x_goal)
         dist = min(self.step_len, dist)
-        node_new = Node((x_start.x + dist * math.cos(theta),
-                         x_start.y + dist * math.sin(theta)))
+        node_new = Node(
+            (x_start.x + dist * math.cos(theta), x_start.y + dist * math.sin(theta))
+        )
         node_new.parent = x_start
 
         return node_new
@@ -124,23 +133,35 @@ class IRrtStar:
         r = 50 * math.sqrt((math.log(n) / n))
 
         dist_table = [(nd.x - node.x) ** 2 + (nd.y - node.y) ** 2 for nd in nodelist]
-        X_near = [nodelist[ind] for ind in range(len(dist_table)) if dist_table[ind] <= r ** 2 and
-                  not self.utils.is_collision(nodelist[ind], node)]
+        X_near = [
+            nodelist[ind]
+            for ind in range(len(dist_table))
+            if dist_table[ind] <= r**2
+            and not self.utils.is_collision(nodelist[ind], node)
+        ]
 
         return X_near
 
     def Sample(self, c_max, c_min, x_center, C):
         if c_max < np.inf:
-            r = [c_max / 2.0,
-                 math.sqrt(c_max ** 2 - c_min ** 2) / 2.0,
-                 math.sqrt(c_max ** 2 - c_min ** 2) / 2.0]
+            r = [
+                c_max / 2.0,
+                math.sqrt(c_max**2 - c_min**2) / 2.0,
+                math.sqrt(c_max**2 - c_min**2) / 2.0,
+            ]
             L = np.diag(r)
 
             while True:
                 x_ball = self.SampleUnitBall()
                 x_rand = np.dot(np.dot(C, L), x_ball) + x_center
-                if self.x_range[0] + self.delta <= x_rand[0] <= self.x_range[1] - self.delta and \
-                        self.y_range[0] + self.delta <= x_rand[1] <= self.y_range[1] - self.delta:
+                if (
+                    self.x_range[0] + self.delta
+                    <= x_rand[0]
+                    <= self.x_range[1] - self.delta
+                    and self.y_range[0] + self.delta
+                    <= x_rand[1]
+                    <= self.y_range[1] - self.delta
+                ):
                     break
             x_rand = Node((x_rand[(0, 0)], x_rand[(1, 0)]))
         else:
@@ -152,15 +173,19 @@ class IRrtStar:
     def SampleUnitBall():
         while True:
             x, y = random.uniform(-1, 1), random.uniform(-1, 1)
-            if x ** 2 + y ** 2 < 1:
+            if x**2 + y**2 < 1:
                 return np.array([[x], [y], [0.0]])
 
     def SampleFreeSpace(self):
         delta = self.delta
 
         if np.random.random() > self.goal_sample_rate:
-            return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            return Node(
+                (
+                    np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
 
         return self.x_goal
 
@@ -183,8 +208,9 @@ class IRrtStar:
 
     @staticmethod
     def RotationToWorldFrame(x_start, x_goal, L):
-        a1 = np.array([[(x_goal.x - x_start.x) / L],
-                       [(x_goal.y - x_start.y) / L], [0.0]])
+        a1 = np.array(
+            [[(x_goal.x - x_start.x) / L], [(x_goal.y - x_start.y) / L], [0.0]]
+        )
         e1 = np.array([[1.0], [0.0], [0.0]])
         M = a1 @ e1.T
         U, _, V_T = np.linalg.svd(M, True, True)
@@ -194,8 +220,9 @@ class IRrtStar:
 
     @staticmethod
     def Nearest(nodelist, n):
-        return nodelist[int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2
-                                       for nd in nodelist]))]
+        return nodelist[
+            int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2 for nd in nodelist]))
+        ]
 
     @staticmethod
     def Line(x_start, x_goal):
@@ -225,8 +252,9 @@ class IRrtStar:
         plt.cla()
         self.plot_grid("Informed rrt*, N = " + str(self.iter_max))
         plt.gcf().canvas.mpl_connect(
-            'key_release_event',
-            lambda event: [exit(0) if event.key == 'escape' else None])
+            "key_release_event",
+            lambda event: [exit(0) if event.key == "escape" else None],
+        )
 
         for node in self.V:
             if node.parent:
@@ -238,34 +266,24 @@ class IRrtStar:
         plt.pause(0.01)
 
     def plot_grid(self, name):
-
-        for (ox, oy, w, h) in self.obs_boundary:
+        for ox, oy, w, h in self.obs_boundary:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='black',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="black", fill=True
                 )
             )
 
-        for (ox, oy, w, h) in self.obs_rectangle:
+        for ox, oy, w, h in self.obs_rectangle:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
-        for (ox, oy, r) in self.obs_circle:
+        for ox, oy, r in self.obs_circle:
             self.ax.add_patch(
                 patches.Circle(
-                    (ox, oy), r,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), r, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
@@ -277,7 +295,7 @@ class IRrtStar:
 
     @staticmethod
     def draw_ellipse(x_center, c_best, dist, theta):
-        a = math.sqrt(c_best ** 2 - dist ** 2) / 2.0
+        a = math.sqrt(c_best**2 - dist**2) / 2.0
         b = c_best / 2.0
         angle = math.pi / 2.0 - theta
         cx = x_center[0]
@@ -285,12 +303,12 @@ class IRrtStar:
         t = np.arange(0, 2 * math.pi + 0.1, 0.1)
         x = [a * math.cos(it) for it in t]
         y = [b * math.sin(it) for it in t]
-        rot = Rot.from_euler('z', -angle).as_dcm()[0:2, 0:2]
+        rot = Rot.from_euler("z", -angle).as_dcm()[0:2, 0:2]
         fx = rot @ np.array([x, y])
         px = np.array(fx[0, :] + cx).flatten()
         py = np.array(fx[1, :] + cy).flatten()
         plt.plot(cx, cy, ".b")
-        plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2)
+        plt.plot(px, py, linestyle="--", color="darkorange", linewidth=2)
 
 
 def main():
@@ -301,5 +319,5 @@ def main():
     rrt_star.planning()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

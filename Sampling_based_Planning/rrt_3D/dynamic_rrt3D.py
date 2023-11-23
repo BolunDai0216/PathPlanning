@@ -2,21 +2,29 @@
 This is dynamic rrt code for 3D
 @author: yue qi
 """
-import numpy as np
-import time
-import matplotlib.pyplot as plt
-
 import os
 import sys
+import time
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/")
+import matplotlib.pyplot as plt
+import numpy as np
+
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 from rrt_3D.env3D import env
-from rrt_3D.utils3D import getDist, sampleFree, nearest, steer, isCollide
-from rrt_3D.plot_util3D import set_axes_equal, draw_block_list, draw_Spheres, draw_obb, draw_line, make_transparent
+from rrt_3D.plot_util3D import (
+    draw_block_list,
+    draw_line,
+    draw_obb,
+    draw_Spheres,
+    make_transparent,
+    set_axes_equal,
+)
+from rrt_3D.utils3D import getDist, isCollide, nearest, sampleFree, steer
 
 
 class dynamic_rrt_3D:
-
     def __init__(self):
         self.env = env()
         self.x0, self.xt = tuple(self.env.start), tuple(self.env.goal)
@@ -45,13 +53,13 @@ class dynamic_rrt_3D:
     def TrimRRT(self):
         S = []
         i = 1
-        print('trimming...')
+        print("trimming...")
         while i < len(self.V):
             qi = self.V[i]
             qp = self.Parent[qi]
-            if self.flag[qp] == 'Invalid':
-                self.flag[qi] = 'Invalid'
-            if self.flag[qi] != 'Invalid':
+            if self.flag[qp] == "Invalid":
+                self.flag[qi] = "Invalid"
+            if self.flag[qi] != "Invalid":
                 S.append(qi)
             i += 1
         self.CreateTreeFromNodes(S)
@@ -60,15 +68,15 @@ class dynamic_rrt_3D:
         Edges = self.FindAffectedEdges(obstacle)
         for edge in Edges:
             qe = self.ChildEndpointNode(edge)
-            self.flag[qe] = 'Invalid'
+            self.flag[qe] = "Invalid"
 
     # --------Extend RRT algorithm-----
     def initRRT(self):
         self.V.append(self.x0)
-        self.flag[self.x0] = 'Valid'
+        self.flag[self.x0] = "Valid"
 
     def GrowRRT(self):
-        print('growing...')
+        print("growing...")
         qnew = self.x0
         distance_threshold = self.stepsize
         self.ind = 0
@@ -80,7 +88,7 @@ class dynamic_rrt_3D:
                 self.AddNode(qnearest, qnew)
                 if getDist(qnew, self.xt) < distance_threshold:
                     self.AddNode(qnearest, self.xt)
-                    self.flag[self.xt] = 'Valid'
+                    self.flag[self.xt] = "Valid"
                     break
                 self.i += 1
             self.ind += 1
@@ -109,7 +117,7 @@ class dynamic_rrt_3D:
         self.V.append(extended)
         self.Parent[extended] = nearest
         self.Edge.add((extended, nearest))
-        self.flag[extended] = 'Valid'
+        self.flag[extended] = "Valid"
 
     def Nearest(self, target):
         # TODO use kdTree to speed up search
@@ -134,7 +142,7 @@ class dynamic_rrt_3D:
         t = 0
         while True:
             # move the block while the robot is moving
-            new, _ = self.env.move_block(a=[0.2, 0, -0.2], mode='translation')
+            new, _ = self.env.move_block(a=[0.2, 0, -0.2], mode="translation")
             self.InvalidateNodes(new)
             self.TrimRRT()
             # if solution path contains invalid node
@@ -157,7 +165,7 @@ class dynamic_rrt_3D:
     def FindAffectedEdges(self, obstacle):
         # scan the graph for the changed edges in the tree.
         # return the end point and the affected
-        print('finding affected edges...')
+        print("finding affected edges...")
         Affectededges = []
         for e in self.Edge:
             child, parent = e
@@ -170,7 +178,7 @@ class dynamic_rrt_3D:
         return edge[0]
 
     def CreateTreeFromNodes(self, Nodes):
-        print('creating tree...')
+        print("creating tree...")
         # self.Parent = {node: self.Parent[node] for node in Nodes}
         self.V = [node for node in Nodes]
         self.Edge = {(node, self.Parent[node]) for node in Nodes}
@@ -179,11 +187,14 @@ class dynamic_rrt_3D:
 
     def PathisInvalid(self, path):
         for edge in path:
-            if self.flag[tuple(edge[0])] == 'Invalid' or self.flag[tuple(edge[1])] == 'Invalid':
+            if (
+                self.flag[tuple(edge[0])] == "Invalid"
+                or self.flag[tuple(edge[1])] == "Invalid"
+            ):
                 return True
 
     def path(self, dist=0):
-        Path=[]
+        Path = []
         x = self.xt
         i = 0
         while x != self.x0:
@@ -192,9 +203,9 @@ class dynamic_rrt_3D:
             dist += getDist(x, x2)
             x = x2
             if i > 10000:
-                print('Path is not found')
-                return 
-            i+= 1
+                print("Path is not found")
+                return
+            i += 1
         return Path, dist
 
     # --------Visualization specialized for dynamic RRT
@@ -208,10 +219,10 @@ class dynamic_rrt_3D:
             # for i in self.Parent:
             #     edges.append([i, self.Parent[i]])
             edges = np.array([list(i) for i in self.Edge])
-            ax = plt.subplot(111, projection='3d')
+            ax = plt.subplot(111, projection="3d")
             # ax.view_init(elev=0.+ 0.03*initparams.ind/(2*np.pi), azim=90 + 0.03*initparams.ind/(2*np.pi))
             # ax.view_init(elev=0., azim=90.)
-            ax.view_init(elev=90., azim=0.)
+            ax.view_init(elev=90.0, azim=0.0)
             ax.clear()
             # drawing objects
             draw_Spheres(ax, self.env.balls)
@@ -219,12 +230,21 @@ class dynamic_rrt_3D:
             if self.env.OBB is not None:
                 draw_obb(ax, self.env.OBB)
             draw_block_list(ax, np.array([self.env.boundary]), alpha=0)
-            draw_line(ax, edges, visibility=0.75, color='g')
-            draw_line(ax, Path, color='r')
+            draw_line(ax, edges, visibility=0.75, color="g")
+            draw_line(ax, Path, color="r")
             # if len(V) > 0:
             #     ax.scatter3D(V[:, 0], V[:, 1], V[:, 2], s=2, color='g', )
-            ax.plot(start[0:1], start[1:2], start[2:], 'go', markersize=7, markeredgecolor='k')
-            ax.plot(goal[0:1], goal[1:2], goal[2:], 'ro', markersize=7, markeredgecolor='k')
+            ax.plot(
+                start[0:1],
+                start[1:2],
+                start[2:],
+                "go",
+                markersize=7,
+                markeredgecolor="k",
+            )
+            ax.plot(
+                goal[0:1], goal[1:2], goal[2:], "ro", markersize=7, markeredgecolor="k"
+            )
             # adjust the aspect ratio
             set_axes_equal(ax)
             make_transparent(ax)
@@ -234,6 +254,6 @@ class dynamic_rrt_3D:
             plt.pause(0.0001)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rrt = dynamic_rrt_3D()
     rrt.Main()

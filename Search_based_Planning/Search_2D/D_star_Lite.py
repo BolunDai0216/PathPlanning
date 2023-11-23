@@ -3,15 +3,17 @@ D_star_Lite 2D
 @author: huiming zhou
 """
 
+import math
 import os
 import sys
-import math
+
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import plotting, env
+from Search_2D import env, plotting
 
 
 class DStar:
@@ -45,7 +47,7 @@ class DStar:
         self.Plot.plot_grid("D* Lite")
         self.ComputePath()
         self.plot_path(self.extract_path())
-        self.fig.canvas.mpl_connect('button_press_event', self.on_press)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_press)
         plt.show()
 
     def on_press(self, event):
@@ -74,12 +76,12 @@ class DStar:
                     s_last = s_curr
                     if (x, y) not in self.obs:
                         self.obs.add((x, y))
-                        plt.plot(x, y, 'sk')
+                        plt.plot(x, y, "sk")
                         self.g[(x, y)] = float("inf")
                         self.rhs[(x, y)] = float("inf")
                     else:
                         self.obs.remove((x, y))
-                        plt.plot(x, y, marker='s', color='white')
+                        plt.plot(x, y, marker="s", color="white")
                         self.UpdateVertex((x, y))
                     for s in self.get_neighbor((x, y)):
                         self.UpdateVertex(s)
@@ -96,8 +98,10 @@ class DStar:
     def ComputePath(self):
         while True:
             s, v = self.TopKey()
-            if v >= self.CalculateKey(self.s_start) and \
-                    self.rhs[self.s_start] == self.g[self.s_start]:
+            if (
+                v >= self.CalculateKey(self.s_start)
+                and self.rhs[self.s_start] == self.g[self.s_start]
+            ):
                 break
 
             k_old = v
@@ -128,8 +132,10 @@ class DStar:
             self.U[s] = self.CalculateKey(s)
 
     def CalculateKey(self, s):
-        return [min(self.g[s], self.rhs[s]) + self.h(self.s_start, s) + self.km,
-                min(self.g[s], self.rhs[s])]
+        return [
+            min(self.g[s], self.rhs[s]) + self.h(self.s_start, s) + self.km,
+            min(self.g[s], self.rhs[s]),
+        ]
 
     def TopKey(self):
         """
@@ -216,15 +222,26 @@ class DStar:
         plt.plot(self.s_goal[0], self.s_goal[1], "gs")
 
     def plot_visited(self, visited):
-        color = ['gainsboro', 'lightgray', 'silver', 'darkgray',
-                 'bisque', 'navajowhite', 'moccasin', 'wheat',
-                 'powderblue', 'skyblue', 'lightskyblue', 'cornflowerblue']
+        color = [
+            "gainsboro",
+            "lightgray",
+            "silver",
+            "darkgray",
+            "bisque",
+            "navajowhite",
+            "moccasin",
+            "wheat",
+            "powderblue",
+            "skyblue",
+            "lightskyblue",
+            "cornflowerblue",
+        ]
 
         if self.count >= len(color) - 1:
             self.count = 0
 
         for x in visited:
-            plt.plot(x[0], x[1], marker='s', color=color[self.count])
+            plt.plot(x[0], x[1], marker="s", color=color[self.count])
 
 
 def main():
@@ -235,5 +252,5 @@ def main():
     dstar.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

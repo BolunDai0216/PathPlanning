@@ -1,10 +1,9 @@
 # plotting
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import mpl_toolkits.mplot3d as plt3d
-from mpl_toolkits.mplot3d import proj3d
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D, proj3d
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 def CreateSphere(center, r):
@@ -24,30 +23,64 @@ def draw_Spheres(ax, balls):
 
 
 def draw_block_list(ax, blocks, color=None, alpha=0.15):
-    '''
+    """
     drawing the blocks on the graph
-    '''
-    v = np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]],
-                 dtype='float')
-    f = np.array([[0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7], [0, 1, 2, 3], [4, 5, 6, 7]])
+    """
+    v = np.array(
+        [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+        ],
+        dtype="float",
+    )
+    f = np.array(
+        [
+            [0, 1, 5, 4],
+            [1, 2, 6, 5],
+            [2, 3, 7, 6],
+            [3, 0, 4, 7],
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+        ]
+    )
     n = blocks.shape[0]
     d = blocks[:, 3:6] - blocks[:, :3]
     vl = np.zeros((8 * n, 3))
-    fl = np.zeros((6 * n, 4), dtype='int64')
+    fl = np.zeros((6 * n, 4), dtype="int64")
     for k in range(n):
-        vl[k * 8:(k + 1) * 8, :] = v * d[k] + blocks[k, :3]
-        fl[k * 6:(k + 1) * 6, :] = f + k * 8
+        vl[k * 8 : (k + 1) * 8, :] = v * d[k] + blocks[k, :3]
+        fl[k * 6 : (k + 1) * 6, :] = f + k * 8
     if type(ax) is Poly3DCollection:
         ax.set_verts(vl[fl])
     else:
-        h = ax.add_collection3d(Poly3DCollection(vl[fl], facecolors='black', alpha=alpha, linewidths=1, edgecolors='k'))
+        h = ax.add_collection3d(
+            Poly3DCollection(
+                vl[fl], facecolors="black", alpha=alpha, linewidths=1, edgecolors="k"
+            )
+        )
         return h
 
 
 def obb_verts(obb):
     # 0.017004013061523438 for 1000 iters
-    ori_body = np.array([[1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1], \
-                         [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1]])
+    ori_body = np.array(
+        [
+            [1, 1, 1],
+            [-1, 1, 1],
+            [-1, -1, 1],
+            [1, -1, 1],
+            [1, 1, -1],
+            [-1, 1, -1],
+            [-1, -1, -1],
+            [1, -1, -1],
+        ]
+    )
     # P + (ori * E)
     ori_body = np.multiply(ori_body, obb.E)
     # obb.O is orthornormal basis in {W}, aka rotation matrix in SO(3)
@@ -56,17 +89,30 @@ def obb_verts(obb):
 
 
 def draw_obb(ax, OBB, color=None, alpha=0.15):
-    f = np.array([[0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7], [0, 1, 2, 3], [4, 5, 6, 7]])
+    f = np.array(
+        [
+            [0, 1, 5, 4],
+            [1, 2, 6, 5],
+            [2, 3, 7, 6],
+            [3, 0, 4, 7],
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+        ]
+    )
     n = OBB.shape[0]
     vl = np.zeros((8 * n, 3))
-    fl = np.zeros((6 * n, 4), dtype='int64')
+    fl = np.zeros((6 * n, 4), dtype="int64")
     for k in range(n):
-        vl[k * 8:(k + 1) * 8, :] = obb_verts(OBB[k])
-        fl[k * 6:(k + 1) * 6, :] = f + k * 8
+        vl[k * 8 : (k + 1) * 8, :] = obb_verts(OBB[k])
+        fl[k * 6 : (k + 1) * 6, :] = f + k * 8
     if type(ax) is Poly3DCollection:
         ax.set_verts(vl[fl])
     else:
-        h = ax.add_collection3d(Poly3DCollection(vl[fl], facecolors='black', alpha=alpha, linewidths=1, edgecolors='k'))
+        h = ax.add_collection3d(
+            Poly3DCollection(
+                vl[fl], facecolors="black", alpha=alpha, linewidths=1, edgecolors="k"
+            )
+        )
         return h
 
 
@@ -85,26 +131,26 @@ def draw_line(ax, SET, visibility=1, color=None):
 
 def visualization(initparams):
     if initparams.ind % 100 == 0 or initparams.done:
-        #----------- list structure
+        # ----------- list structure
         # V = np.array(list(initparams.V))
         # E = initparams.E
-        #----------- end
+        # ----------- end
         # edges = initparams.E
         Path = np.array(initparams.Path)
         start = initparams.env.start
         goal = initparams.env.goal
         # edges = E.get_edge()
-        #----------- list structure
+        # ----------- list structure
         edges = []
         for i in initparams.Parent:
-            edges.append([i,initparams.Parent[i]])
-        #----------- end
+            edges.append([i, initparams.Parent[i]])
+        # ----------- end
         # generate axis objects
-        ax = plt.subplot(111, projection='3d')
-        
+        ax = plt.subplot(111, projection="3d")
+
         # ax.view_init(elev=0.+ 0.03*initparams.ind/(2*np.pi), azim=90 + 0.03*initparams.ind/(2*np.pi))
         # ax.view_init(elev=0., azim=90.)
-        ax.view_init(elev=65., azim=60.)
+        ax.view_init(elev=65.0, azim=60.0)
         # ax.view_init(elev=-8., azim=180)
         ax.clear()
         # drawing objects
@@ -113,29 +159,32 @@ def visualization(initparams):
         if initparams.env.OBB is not None:
             draw_obb(ax, initparams.env.OBB)
         draw_block_list(ax, np.array([initparams.env.boundary]), alpha=0)
-        draw_line(ax, edges, visibility=0.75, color='g')
-        draw_line(ax, Path, color='r')
+        draw_line(ax, edges, visibility=0.75, color="g")
+        draw_line(ax, Path, color="r")
         # if len(V) > 0:
         #     ax.scatter3D(V[:, 0], V[:, 1], V[:, 2], s=2, color='g', )
-        ax.plot(start[0:1], start[1:2], start[2:], 'go', markersize=7, markeredgecolor='k')
-        ax.plot(goal[0:1], goal[1:2], goal[2:], 'ro', markersize=7, markeredgecolor='k')
+        ax.plot(
+            start[0:1], start[1:2], start[2:], "go", markersize=7, markeredgecolor="k"
+        )
+        ax.plot(goal[0:1], goal[1:2], goal[2:], "ro", markersize=7, markeredgecolor="k")
         # adjust the aspect ratio
         ax.dist = 15
         set_axes_equal(ax)
         make_transparent(ax)
-        #plt.xlabel('s')
-        #plt.ylabel('y')
+        # plt.xlabel('s')
+        # plt.ylabel('y')
         ax.set_axis_off()
         plt.pause(0.0001)
 
+
 def set_axes_equal(ax):
-    '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
+    """Make axes of 3D plot have equal scale so that spheres appear as spheres,
     cubes as cubes, etc..  This is one possible solution to Matplotlib's
     ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
     https://stackoverflow.com/questions/13685386/matplotlib-equal-unit-length-with-equal-aspect-ratio-z-axis-is-not-equal-to
     Input
       ax: a matplotlib axis, e.g., as output from plt.gca().
-    '''
+    """
 
     x_limits = ax.get_xlim3d()
     y_limits = ax.get_ylim3d()
@@ -150,11 +199,12 @@ def set_axes_equal(ax):
 
     # The plot bounding box is a sphere in the sense of the infinity
     # norm, hence I call half the max range the plot radius.
-    plot_radius = 0.5*max([x_range, y_range, z_range])
+    plot_radius = 0.5 * max([x_range, y_range, z_range])
 
     ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
     ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
 
 def make_transparent(ax):
     # make the panes transparent
@@ -162,9 +212,10 @@ def make_transparent(ax):
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     # make the grid lines transparent
-    ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-    ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-    ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+    ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+    ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     pass

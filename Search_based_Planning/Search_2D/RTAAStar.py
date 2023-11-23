@@ -3,15 +3,16 @@ RTAAstar 2D (Real-time Adaptive A*)
 @author: huiming zhou
 """
 
-import os
-import sys
 import copy
 import math
+import os
+import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import queue, plotting, env
+from Search_2D import env, plotting, queue
 
 
 class RTAAStar:
@@ -44,8 +45,7 @@ class RTAAStar:
         s_start = self.s_start  # initialize start node
 
         while True:
-            OPEN, CLOSED, g_table, PARENT = \
-                self.Astar(s_start, self.N)
+            OPEN, CLOSED, g_table, PARENT = self.Astar(s_start, self.N)
 
             if OPEN == "FOUND":  # reach the goal node
                 self.path.append(CLOSED)
@@ -62,7 +62,7 @@ class RTAAStar:
     def cal_h_value(self, OPEN, CLOSED, g_table, PARENT):
         v_open = {}
         h_value = {}
-        for (_, x) in OPEN.enumerate():
+        for _, x in OPEN.enumerate():
             v_open[x] = g_table[PARENT[x]] + 1 + self.h_table[x]
         s_open = min(v_open, key=v_open.get)
         f_min = v_open[s_open]
@@ -150,7 +150,9 @@ class RTAAStar:
             for s_n in self.get_neighbor(s):
                 if s_n in h_value:
                     h_list[s_n] = h_value[s_n]
-            s_key = max(h_list, key=h_list.get)  # move to the smallest node with min h_value
+            s_key = max(
+                h_list, key=h_list.get
+            )  # move to the smallest node with min h_value
             path.append(s_key)  # generate path
             s = s_key  # use end of this iteration as the start of next
 
@@ -229,9 +231,8 @@ def main():
     plot = plotting.Plotting(s_start, s_goal)
 
     rtaa.searching()
-    plot.animation_lrta(rtaa.path, rtaa.visited,
-                        "Real-time Adaptive A* (RTAA*)")
+    plot.animation_lrta(rtaa.path, rtaa.visited, "Real-time Adaptive A* (RTAA*)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

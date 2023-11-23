@@ -3,15 +3,17 @@ D_star 2D
 @author: huiming zhou
 """
 
+import math
 import os
 import sys
-import math
+
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import plotting, env
+from Search_2D import env, plotting
 
 
 class DStar:
@@ -40,7 +42,7 @@ class DStar:
     def init(self):
         for i in range(self.Env.x_range):
             for j in range(self.Env.y_range):
-                self.t[(i, j)] = 'NEW'
+                self.t[(i, j)] = "NEW"
                 self.k[(i, j)] = 0.0
                 self.h[(i, j)] = float("inf")
                 self.PARENT[(i, j)] = None
@@ -53,13 +55,13 @@ class DStar:
 
         while True:
             self.process_state()
-            if self.t[s_start] == 'CLOSED':
+            if self.t[s_start] == "CLOSED":
                 break
 
         self.path = self.extract_path(s_start, s_end)
         self.Plot.plot_grid("Dynamic A* (D*)")
         self.plot_path(self.path)
-        self.fig.canvas.mpl_connect('button_press_event', self.on_press)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_press)
         plt.show()
 
     def on_press(self, event):
@@ -108,15 +110,15 @@ class DStar:
         if s is None:
             return -1  # OPEN set is empty
 
-        k_old = self.get_k_min()  # record the min k value of this iteration (min path cost)
+        k_old = (
+            self.get_k_min()
+        )  # record the min k value of this iteration (min path cost)
         self.delete(s)  # move state s from OPEN set to CLOSED set
 
         # k_min < h[s] --> s: RAISE state (increased cost)
         if k_old < self.h[s]:
             for s_n in self.get_neighbor(s):
-                if self.h[s_n] <= k_old and \
-                        self.h[s] > self.h[s_n] + self.cost(s_n, s):
-
+                if self.h[s_n] <= k_old and self.h[s] > self.h[s_n] + self.cost(s_n, s):
                     # update h_value and choose parent
                     self.PARENT[s] = s_n
                     self.h[s] = self.h[s_n] + self.cost(s_n, s)
@@ -124,10 +126,17 @@ class DStar:
         # s: k_min >= h[s] -- > s: LOWER state (cost reductions)
         if k_old == self.h[s]:
             for s_n in self.get_neighbor(s):
-                if self.t[s_n] == 'NEW' or \
-                        (self.PARENT[s_n] == s and self.h[s_n] != self.h[s] + self.cost(s, s_n)) or \
-                        (self.PARENT[s_n] != s and self.h[s_n] > self.h[s] + self.cost(s, s_n)):
-
+                if (
+                    self.t[s_n] == "NEW"
+                    or (
+                        self.PARENT[s_n] == s
+                        and self.h[s_n] != self.h[s] + self.cost(s, s_n)
+                    )
+                    or (
+                        self.PARENT[s_n] != s
+                        and self.h[s_n] > self.h[s] + self.cost(s, s_n)
+                    )
+                ):
                     # Condition:
                     # 1) t[s_n] == 'NEW': not visited
                     # 2) s_n's parent: cost reduction
@@ -136,26 +145,28 @@ class DStar:
                     self.insert(s_n, self.h[s] + self.cost(s, s_n))
         else:
             for s_n in self.get_neighbor(s):
-                if self.t[s_n] == 'NEW' or \
-                        (self.PARENT[s_n] == s and self.h[s_n] != self.h[s] + self.cost(s, s_n)):
-
+                if self.t[s_n] == "NEW" or (
+                    self.PARENT[s_n] == s
+                    and self.h[s_n] != self.h[s] + self.cost(s, s_n)
+                ):
                     # Condition:
                     # 1) t[s_n] == 'NEW': not visited
                     # 2) s_n's parent: cost reduction
                     self.PARENT[s_n] = s
                     self.insert(s_n, self.h[s] + self.cost(s, s_n))
                 else:
-                    if self.PARENT[s_n] != s and \
-                            self.h[s_n] > self.h[s] + self.cost(s, s_n):
-
+                    if self.PARENT[s_n] != s and self.h[s_n] > self.h[s] + self.cost(
+                        s, s_n
+                    ):
                         # Condition: LOWER happened in OPEN set (s), s should be explored again
                         self.insert(s, self.h[s])
                     else:
-                        if self.PARENT[s_n] != s and \
-                                self.h[s] > self.h[s_n] + self.cost(s_n, s) and \
-                                self.t[s_n] == 'CLOSED' and \
-                                self.h[s_n] > k_old:
-
+                        if (
+                            self.PARENT[s_n] != s
+                            and self.h[s] > self.h[s_n] + self.cost(s_n, s)
+                            and self.t[s_n] == "CLOSED"
+                            and self.h[s_n] > k_old
+                        ):
                             # Condition: LOWER happened in CLOSED set (s_n), s_n should be explored again
                             self.insert(s_n, self.h[s_n])
 
@@ -190,15 +201,15 @@ class DStar:
         :param h_new: new or better cost to come value
         """
 
-        if self.t[s] == 'NEW':
+        if self.t[s] == "NEW":
             self.k[s] = h_new
-        elif self.t[s] == 'OPEN':
+        elif self.t[s] == "OPEN":
             self.k[s] = min(self.k[s], h_new)
-        elif self.t[s] == 'CLOSED':
+        elif self.t[s] == "CLOSED":
             self.k[s] = min(self.h[s], h_new)
 
         self.h[s] = h_new
-        self.t[s] = 'OPEN'
+        self.t[s] = "OPEN"
         self.OPEN.add(s)
 
     def delete(self, s):
@@ -207,8 +218,8 @@ class DStar:
         :param s: state should be deleted
         """
 
-        if self.t[s] == 'OPEN':
-            self.t[s] = 'CLOSED'
+        if self.t[s] == "OPEN":
+            self.t[s] = "CLOSED"
 
         self.OPEN.remove(s)
 
@@ -230,7 +241,7 @@ class DStar:
         # if node in CLOSED set, put it into OPEN set.
         # Since cost may be changed between s - s.parent, calc cost(s, s.p) again
 
-        if self.t[s] == 'CLOSED':
+        if self.t[s] == "CLOSED":
             self.insert(s, self.h[self.PARENT[s]] + self.cost(s, self.PARENT[s]))
 
     def get_neighbor(self, s):
@@ -282,15 +293,26 @@ class DStar:
         plt.plot(self.s_goal[0], self.s_goal[1], "gs")
 
     def plot_visited(self, visited):
-        color = ['gainsboro', 'lightgray', 'silver', 'darkgray',
-                 'bisque', 'navajowhite', 'moccasin', 'wheat',
-                 'powderblue', 'skyblue', 'lightskyblue', 'cornflowerblue']
+        color = [
+            "gainsboro",
+            "lightgray",
+            "silver",
+            "darkgray",
+            "bisque",
+            "navajowhite",
+            "moccasin",
+            "wheat",
+            "powderblue",
+            "skyblue",
+            "lightskyblue",
+            "cornflowerblue",
+        ]
 
         if self.count >= len(color) - 1:
             self.count = 0
 
         for x in visited:
-            plt.plot(x[0], x[1], marker='s', color=color[self.count])
+            plt.plot(x[0], x[1], marker="s", color=color[self.count])
 
 
 def main():
@@ -300,5 +322,5 @@ def main():
     dstar.run(s_start, s_goal)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

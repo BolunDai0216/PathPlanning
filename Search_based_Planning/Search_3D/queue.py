@@ -2,6 +2,7 @@ import collections
 import heapq
 import itertools
 
+
 class QueueFIFO:
     """
     Class: QueueFIFO
@@ -62,27 +63,29 @@ class QueuePrior:
         return self.queue
 
     def check_remove(self, item):
-        for (p, x) in self.queue:
+        for p, x in self.queue:
             if item == x:
                 self.queue.remove((p, x))
 
     def top_key(self):
         return self.queue[0][0]
 
+
 class MinheapPQ:
     """
     A priority queue based on min heap, which takes O(logn) on element removal
     https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes
     """
+
     def __init__(self):
-        self.pq = [] # lis of the entries arranged in a heap
+        self.pq = []  # lis of the entries arranged in a heap
         self.nodes = set()
-        self.entry_finder = {} # mapping of the item entries
-        self.counter = itertools.count() # unique sequence count
-        self.REMOVED = '<removed-item>'
-    
+        self.entry_finder = {}  # mapping of the item entries
+        self.counter = itertools.count()  # unique sequence count
+        self.REMOVED = "<removed-item>"
+
     def put(self, item, priority):
-        '''add a new task or update the priority of an existing item'''
+        """add a new task or update the priority of an existing item"""
         if item in self.entry_finder:
             self.check_remove(item)
         count = next(self.counter)
@@ -106,16 +109,17 @@ class MinheapPQ:
                 del self.entry_finder[item]
                 self.nodes.remove(item)
                 return item
-        raise KeyError('pop from an empty priority queue')
+        raise KeyError("pop from an empty priority queue")
 
     def top_key(self):
         return self.pq[0][0]
-        
+
     def enumerate(self):
         return self.pq
 
     def allnodes(self):
         return self.nodes
+
 
 # class QueuePrior:
 #     """

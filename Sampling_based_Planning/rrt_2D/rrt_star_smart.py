@@ -3,17 +3,19 @@ RRT_STAR_SMART 2D
 @author: huiming zhou
 """
 
-import os
-import sys
 import math
+import os
 import random
-import numpy as np
-import matplotlib.pyplot as plt
+import sys
+
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.spatial.transform import Rotation as Rot
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
 from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
@@ -26,8 +28,9 @@ class Node:
 
 
 class RrtStarSmart:
-    def __init__(self, x_start, x_goal, step_len,
-                 goal_sample_rate, search_radius, iter_max):
+    def __init__(
+        self, x_start, x_goal, step_len, goal_sample_rate, search_radius, iter_max
+    ):
         self.x_start = Node(x_start)
         self.x_goal = Node(x_goal)
         self.step_len = step_len
@@ -78,7 +81,10 @@ class RrtStarSmart:
 
                 if X_near:
                     # choose parent
-                    cost_list = [self.Cost(x_near) + self.Line(x_near, x_new) for x_near in X_near]
+                    cost_list = [
+                        self.Cost(x_near) + self.Line(x_near, x_new)
+                        for x_near in X_near
+                    ]
                     x_new.parent = X_near[int(np.argmin(cost_list))]
 
                     # rewire
@@ -100,7 +106,7 @@ class RrtStarSmart:
 
         self.path = self.ExtractPath()
         self.animation()
-        plt.plot([x for x, _ in self.path], [y for _, y in self.path], '-r')
+        plt.plot([x for x, _ in self.path], [y for _, y in self.path], "-r")
         plt.pause(0.01)
         plt.show()
 
@@ -127,8 +133,11 @@ class RrtStarSmart:
         beacons = []
 
         while node.parent:
-            near_vertex = [v for v in self.obs_vertex
-                           if (node.x - v[0]) ** 2 + (node.y - v[1]) ** 2 < 9]
+            near_vertex = [
+                v
+                for v in self.obs_vertex
+                if (node.x - v[0]) ** 2 + (node.y - v[1]) ** 2 < 9
+            ]
             if len(near_vertex) > 0:
                 for v in near_vertex:
                     beacons.append(v)
@@ -149,8 +158,9 @@ class RrtStarSmart:
     def Steer(self, x_start, x_goal):
         dist, theta = self.get_distance_and_angle(x_start, x_goal)
         dist = min(self.step_len, dist)
-        node_new = Node((x_start.x + dist * math.cos(theta),
-                         x_start.y + dist * math.sin(theta)))
+        node_new = Node(
+            (x_start.x + dist * math.cos(theta), x_start.y + dist * math.sin(theta))
+        )
         node_new.parent = x_start
 
         return node_new
@@ -160,8 +170,12 @@ class RrtStarSmart:
         r = 50 * math.sqrt((math.log(n) / n))
 
         dist_table = [(nd.x - node.x) ** 2 + (nd.y - node.y) ** 2 for nd in nodelist]
-        X_near = [nodelist[ind] for ind in range(len(dist_table)) if dist_table[ind] <= r ** 2 and
-                  not self.utils.is_collision(node, nodelist[ind])]
+        X_near = [
+            nodelist[ind]
+            for ind in range(len(dist_table))
+            if dist_table[ind] <= r**2
+            and not self.utils.is_collision(node, nodelist[ind])
+        ]
 
         return X_near
 
@@ -171,8 +185,16 @@ class RrtStarSmart:
             goal_sample_rate = self.goal_sample_rate
 
             if np.random.random() > goal_sample_rate:
-                return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                             np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+                return Node(
+                    (
+                        np.random.uniform(
+                            self.x_range[0] + delta, self.x_range[1] - delta
+                        ),
+                        np.random.uniform(
+                            self.y_range[0] + delta, self.y_range[1] - delta
+                        ),
+                    )
+                )
 
             return self.x_goal
         else:
@@ -181,15 +203,20 @@ class RrtStarSmart:
             theta = random.uniform(0, 2 * math.pi)
             ind = random.randint(0, len(goal) - 1)
 
-            return Node((goal[ind][0] + r * math.cos(theta),
-                         goal[ind][1] + r * math.sin(theta)))
+            return Node(
+                (goal[ind][0] + r * math.cos(theta), goal[ind][1] + r * math.sin(theta))
+            )
 
     def SampleFreeSpace(self):
         delta = self.delta
 
         if np.random.random() > self.goal_sample_rate:
-            return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            return Node(
+                (
+                    np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
 
         return self.x_goal
 
@@ -213,8 +240,9 @@ class RrtStarSmart:
 
     @staticmethod
     def Nearest(nodelist, n):
-        return nodelist[int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2
-                                       for nd in nodelist]))]
+        return nodelist[
+            int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2 for nd in nodelist]))
+        ]
 
     @staticmethod
     def Line(x_start, x_goal):
@@ -242,8 +270,9 @@ class RrtStarSmart:
         plt.cla()
         self.plot_grid("rrt*-Smart, N = " + str(self.iter_max))
         plt.gcf().canvas.mpl_connect(
-            'key_release_event',
-            lambda event: [exit(0) if event.key == 'escape' else None])
+            "key_release_event",
+            lambda event: [exit(0) if event.key == "escape" else None],
+        )
 
         for node in self.V:
             if node.parent:
@@ -256,39 +285,29 @@ class RrtStarSmart:
             for v in self.beacons:
                 x = v[0] + r * np.cos(theta)
                 y = v[1] + r * np.sin(theta)
-                plt.plot(x, y, linestyle='--', linewidth=2, color='darkorange')
+                plt.plot(x, y, linestyle="--", linewidth=2, color="darkorange")
 
         plt.pause(0.01)
 
     def plot_grid(self, name):
-
-        for (ox, oy, w, h) in self.obs_boundary:
+        for ox, oy, w, h in self.obs_boundary:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='black',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="black", fill=True
                 )
             )
 
-        for (ox, oy, w, h) in self.obs_rectangle:
+        for ox, oy, w, h in self.obs_rectangle:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
-        for (ox, oy, r) in self.obs_circle:
+        for ox, oy, r in self.obs_circle:
             self.ax.add_patch(
                 patches.Circle(
-                    (ox, oy), r,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), r, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
@@ -307,5 +326,5 @@ def main():
     rrt.planning()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

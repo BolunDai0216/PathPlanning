@@ -3,21 +3,32 @@
 This is rrt extend code for 3D
 @author: yue qi
 """
-import numpy as np
-from numpy.matlib import repmat
-from collections import defaultdict
-import time
-import matplotlib.pyplot as plt
-
 import os
 import sys
+import time
+from collections import defaultdict
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/")
-from rrt_3D.env3D import env
-from rrt_3D.utils3D import getDist, sampleFree, nearest, steer, isCollide, near, visualization, cost, path
+import matplotlib.pyplot as plt
+import numpy as np
+from numpy.matlib import repmat
 
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 # here attempt to use a KD tree for the data structure implementation
 import scipy.spatial.kdtree as KDtree
+from rrt_3D.env3D import env
+from rrt_3D.utils3D import (
+    cost,
+    getDist,
+    isCollide,
+    near,
+    nearest,
+    path,
+    sampleFree,
+    steer,
+    visualization,
+)
 
 
 class extend_rrt(object):
@@ -27,22 +38,22 @@ class extend_rrt(object):
         self.current = tuple(self.env.start)
         self.stepsize = 0.5
         self.maxiter = 10000
-        self.GoalProb = 0.05 # probability biased to the goal
-        self.WayPointProb = 0.05 # probability falls back on to the way points
+        self.GoalProb = 0.05  # probability biased to the goal
+        self.WayPointProb = 0.05  # probability falls back on to the way points
 
         self.done = False
-        self.V = [] # vertices
+        self.V = []  # vertices
         self.Parent = {}
         self.Path = []
         self.ind = 0
         self.i = 0
 
-    #--------- basic rrt algorithm----------
+    # --------- basic rrt algorithm----------
     def RRTplan(self, env, initial, goal):
         threshold = self.stepsize
-        nearest = initial # state structure
+        nearest = initial  # state structure
         self.V.append(initial)
-        rrt_tree = initial # TODO KDtree structure
+        rrt_tree = initial  # TODO KDtree structure
         while self.ind <= self.maxiter:
             target = self.ChooseTarget(goal)
             nearest = self.Nearest(rrt_tree, target)
@@ -55,20 +66,19 @@ class extend_rrt(object):
                 self.i += 1
             self.ind += 1
             visualization(self)
-            
+
         # return rrt_tree
         self.done = True
         self.Path, _ = path(self)
         visualization(self)
         plt.show()
-        
 
     def Nearest(self, tree, target):
         # TODO use kdTree to speed up search
         return nearest(self, target, isset=True)
 
     def Extend(self, env, nearest, target):
-        extended, dist = steer(self, nearest, target, DIST = True)
+        extended, dist = steer(self, nearest, target, DIST=True)
         collide, _ = isCollide(self, nearest, target, dist)
         return extended, collide
 
@@ -82,21 +92,22 @@ class extend_rrt(object):
         xrand = sampleFree(self, bias=0)
         return xrand
 
-    #--------- insight to the rrt_extend
+    # --------- insight to the rrt_extend
     def ChooseTarget(self, state):
         # return the goal, or randomly choose a state in the waypoints based on probs
         p = np.random.uniform()
         if len(self.V) == 1:
             i = 0
         else:
-            i = np.random.randint(0, high = len(self.V) - 1)
+            i = np.random.randint(0, high=len(self.V) - 1)
         if 0 < p < self.GoalProb:
             return self.xt
         elif self.GoalProb < p < self.GoalProb + self.WayPointProb:
             return self.V[i]
         elif self.GoalProb + self.WayPointProb < p < 1:
             return tuple(self.RandomState())
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     t = extend_rrt()
     _ = t.RRTplan(t.env, t.x0, t.xt)

@@ -5,10 +5,12 @@ Plot tools 2D
 
 import os
 import sys
+
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
 from Search_2D import env
 
@@ -71,7 +73,7 @@ class Plotting:
         plt.title(name)
         plt.axis("equal")
 
-    def plot_visited(self, visited, cl='gray'):
+    def plot_visited(self, visited, cl="gray"):
         if self.xI in visited:
             visited.remove(self.xI)
 
@@ -82,9 +84,11 @@ class Plotting:
 
         for x in visited:
             count += 1
-            plt.plot(x[0], x[1], color=cl, marker='o')
-            plt.gcf().canvas.mpl_connect('key_release_event',
-                                         lambda event: [exit(0) if event.key == 'escape' else None])
+            plt.plot(x[0], x[1], color=cl, marker="o")
+            plt.gcf().canvas.mpl_connect(
+                "key_release_event",
+                lambda event: [exit(0) if event.key == "escape" else None],
+            )
 
             if count < len(visited) / 3:
                 length = 20
@@ -99,14 +103,14 @@ class Plotting:
                 plt.pause(0.001)
         plt.pause(0.01)
 
-    def plot_path(self, path, cl='r', flag=False):
+    def plot_path(self, path, cl="r", flag=False):
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
 
         if not flag:
-            plt.plot(path_x, path_y, linewidth='3', color='r')
+            plt.plot(path_x, path_y, linewidth="3", color="r")
         else:
-            plt.plot(path_x, path_y, linewidth='3', color=cl)
+            plt.plot(path_x, path_y, linewidth="3", color=cl)
 
         plt.plot(self.xI[0], self.xI[1], "bs")
         plt.plot(self.xG[0], self.xG[1], "gs")
@@ -124,12 +128,22 @@ class Plotting:
 
         for k in range(max(len_fore, len_back)):
             if k < len_fore:
-                plt.plot(v_fore[k][0], v_fore[k][1], linewidth='3', color='gray', marker='o')
+                plt.plot(
+                    v_fore[k][0], v_fore[k][1], linewidth="3", color="gray", marker="o"
+                )
             if k < len_back:
-                plt.plot(v_back[k][0], v_back[k][1], linewidth='3', color='cornflowerblue', marker='o')
+                plt.plot(
+                    v_back[k][0],
+                    v_back[k][1],
+                    linewidth="3",
+                    color="cornflowerblue",
+                    marker="o",
+                )
 
-            plt.gcf().canvas.mpl_connect('key_release_event',
-                                         lambda event: [exit(0) if event.key == 'escape' else None])
+            plt.gcf().canvas.mpl_connect(
+                "key_release_event",
+                lambda event: [exit(0) if event.key == "escape" else None],
+            )
 
             if k % 10 == 0:
                 plt.pause(0.001)
@@ -137,29 +151,22 @@ class Plotting:
 
     @staticmethod
     def color_list():
-        cl_v = ['silver',
-                'wheat',
-                'lightskyblue',
-                'royalblue',
-                'slategray']
-        cl_p = ['gray',
-                'orange',
-                'deepskyblue',
-                'red',
-                'm']
+        cl_v = ["silver", "wheat", "lightskyblue", "royalblue", "slategray"]
+        cl_p = ["gray", "orange", "deepskyblue", "red", "m"]
         return cl_v, cl_p
 
     @staticmethod
     def color_list_2():
-        cl = ['silver',
-              'steelblue',
-              'dimgray',
-              'cornflowerblue',
-              'dodgerblue',
-              'royalblue',
-              'plum',
-              'mediumslateblue',
-              'mediumpurple',
-              'blueviolet',
-              ]
+        cl = [
+            "silver",
+            "steelblue",
+            "dimgray",
+            "cornflowerblue",
+            "dodgerblue",
+            "royalblue",
+            "plum",
+            "mediumslateblue",
+            "mediumpurple",
+            "blueviolet",
+        ]
         return cl

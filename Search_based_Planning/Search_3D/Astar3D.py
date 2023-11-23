@@ -4,35 +4,70 @@
 """
 @author: yue qi
 """
-import numpy as np
-import matplotlib.pyplot as plt
-
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/")
-from Search_3D.env3D import env
-from Search_3D.utils3D import getDist, getRay, g_Space, Heuristic, getNearest, isCollide, \
-    cost, children, StateSpace, heuristic_fun
-from Search_3D.plot_util3D import visualization
+import matplotlib.pyplot as plt
+import numpy as np
+
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 import queue
 import time
 
+from Search_3D.env3D import env
+from Search_3D.plot_util3D import visualization
+from Search_3D.utils3D import (
+    Heuristic,
+    StateSpace,
+    children,
+    cost,
+    g_Space,
+    getDist,
+    getNearest,
+    getRay,
+    heuristic_fun,
+    isCollide,
+)
+
+
 class Weighted_A_star(object):
     def __init__(self, resolution=0.5):
-        self.Alldirec = {(1, 0, 0): 1, (0, 1, 0): 1, (0, 0, 1): 1, \
-                        (-1, 0, 0): 1, (0, -1, 0): 1, (0, 0, -1): 1, \
-                        (1, 1, 0): np.sqrt(2), (1, 0, 1): np.sqrt(2), (0, 1, 1): np.sqrt(2), \
-                        (-1, -1, 0): np.sqrt(2), (-1, 0, -1): np.sqrt(2), (0, -1, -1): np.sqrt(2), \
-                        (1, -1, 0): np.sqrt(2), (-1, 1, 0): np.sqrt(2), (1, 0, -1): np.sqrt(2), \
-                        (-1, 0, 1): np.sqrt(2), (0, 1, -1): np.sqrt(2), (0, -1, 1): np.sqrt(2), \
-                        (1, 1, 1): np.sqrt(3), (-1, -1, -1) : np.sqrt(3), \
-                        (1, -1, -1): np.sqrt(3), (-1, 1, -1): np.sqrt(3), (-1, -1, 1): np.sqrt(3), \
-                        (1, 1, -1): np.sqrt(3), (1, -1, 1): np.sqrt(3), (-1, 1, 1): np.sqrt(3)}
-        self.settings = 'NonCollisionChecking' # 'NonCollisionChecking' or 'CollisionChecking'                
+        self.Alldirec = {
+            (1, 0, 0): 1,
+            (0, 1, 0): 1,
+            (0, 0, 1): 1,
+            (-1, 0, 0): 1,
+            (0, -1, 0): 1,
+            (0, 0, -1): 1,
+            (1, 1, 0): np.sqrt(2),
+            (1, 0, 1): np.sqrt(2),
+            (0, 1, 1): np.sqrt(2),
+            (-1, -1, 0): np.sqrt(2),
+            (-1, 0, -1): np.sqrt(2),
+            (0, -1, -1): np.sqrt(2),
+            (1, -1, 0): np.sqrt(2),
+            (-1, 1, 0): np.sqrt(2),
+            (1, 0, -1): np.sqrt(2),
+            (-1, 0, 1): np.sqrt(2),
+            (0, 1, -1): np.sqrt(2),
+            (0, -1, 1): np.sqrt(2),
+            (1, 1, 1): np.sqrt(3),
+            (-1, -1, -1): np.sqrt(3),
+            (1, -1, -1): np.sqrt(3),
+            (-1, 1, -1): np.sqrt(3),
+            (-1, -1, 1): np.sqrt(3),
+            (1, 1, -1): np.sqrt(3),
+            (1, -1, 1): np.sqrt(3),
+            (-1, 1, 1): np.sqrt(3),
+        }
+        self.settings = (
+            "NonCollisionChecking"  # 'NonCollisionChecking' or 'CollisionChecking'
+        )
         self.env = env(resolution=resolution)
         self.start, self.goal = tuple(self.env.start), tuple(self.env.goal)
-        self.g = {self.start:0,self.goal:np.inf}
+        self.g = {self.start: 0, self.goal: np.inf}
         self.Parent = {}
         self.CLOSED = set()
         self.V = []
@@ -41,7 +76,9 @@ class Weighted_A_star(object):
         self.ind = 0
         self.x0, self.xt = self.start, self.goal
         self.OPEN = queue.MinheapPQ()  # store [point,priority]
-        self.OPEN.put(self.x0, self.g[self.x0] + heuristic_fun(self,self.x0))  # item, priority = g + h
+        self.OPEN.put(
+            self.x0, self.g[self.x0] + heuristic_fun(self, self.x0)
+        )  # item, priority = g + h
         self.lastpoint = self.x0
 
     def run(self, N=None):
@@ -52,10 +89,10 @@ class Weighted_A_star(object):
             if xi not in self.CLOSED:
                 self.V.append(np.array(xi))
             self.CLOSED.add(xi)  # add the point in CLOSED set
-            if getDist(xi,xt) < self.env.resolution:
+            if getDist(xi, xt) < self.env.resolution:
                 break
             # visualization(self)
-            for xj in children(self,xi):
+            for xj in children(self, xi):
                 # if xj not in self.CLOSED:
                 if xj not in self.g:
                     self.g[xj] = np.inf
@@ -71,7 +108,8 @@ class Weighted_A_star(object):
             if N:
                 if len(self.CLOSED) % N == 0:
                     break
-            if self.ind % 100 == 0: print('number node expanded = ' + str(len(self.V)))
+            if self.ind % 100 == 0:
+                print("number node expanded = " + str(len(self.V)))
             self.ind += 1
 
         self.lastpoint = xi
@@ -102,14 +140,15 @@ class Weighted_A_star(object):
         self.start = xj
         self.g[getNearest(self.g, self.start)] = 0  # set g(x0) = 0
         self.x0 = xj
-        self.OPEN.put(self.x0, self.g[self.x0] + heuristic_fun(self,self.x0))  # item, priority = g + h
+        self.OPEN.put(
+            self.x0, self.g[self.x0] + heuristic_fun(self, self.x0)
+        )  # item, priority = g + h
         self.CLOSED = set()
 
         # self.h = h(self.Space, self.goal)
 
 
-if __name__ == '__main__':
-    
+if __name__ == "__main__":
     Astar = Weighted_A_star(0.5)
     sta = time.time()
     Astar.run()

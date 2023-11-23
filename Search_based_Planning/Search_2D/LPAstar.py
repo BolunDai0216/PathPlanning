@@ -3,15 +3,17 @@ LPA_star 2D
 @author: huiming zhou
 """
 
+import math
 import os
 import sys
-import math
+
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import plotting, env
+from Search_2D import env, plotting
 
 
 class LPAStar:
@@ -46,7 +48,7 @@ class LPAStar:
 
         self.ComputeShortestPath()
         self.plot_path(self.extract_path())
-        self.fig.canvas.mpl_connect('button_press_event', self.on_press)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_press)
 
         plt.show()
 
@@ -84,20 +86,20 @@ class LPAStar:
         while True:
             s, v = self.TopKey()
 
-            if v >= self.CalculateKey(self.s_goal) and \
-                    self.rhs[self.s_goal] == self.g[self.s_goal]:
+            if (
+                v >= self.CalculateKey(self.s_goal)
+                and self.rhs[self.s_goal] == self.g[self.s_goal]
+            ):
                 break
 
             self.U.pop(s)
             self.visited.add(s)
 
             if self.g[s] > self.rhs[s]:
-
                 # Condition: over-consistent (eg: deleted obstacles)
                 # So, rhs[s] decreased -- > rhs[s] < g[s]
                 self.g[s] = self.rhs[s]
             else:
-
                 # Condition: # under-consistent (eg: added obstacles)
                 # So, rhs[s] increased --> rhs[s] > g[s]
                 self.g[s] = float("inf")
@@ -113,17 +115,16 @@ class LPAStar:
         """
 
         if s != self.s_start:
-
             # Condition: cost of parent of s changed
             # Since we do not record the children of a state, we need to enumerate its neighbors
-            self.rhs[s] = min(self.g[s_n] + self.cost(s_n, s)
-                              for s_n in self.get_neighbor(s))
+            self.rhs[s] = min(
+                self.g[s_n] + self.cost(s_n, s) for s_n in self.get_neighbor(s)
+            )
 
         if s in self.U:
             self.U.pop(s)
 
         if self.g[s] != self.rhs[s]:
-
             # Condition: current cost to come is different to that of last time
             # state s should be added into OPEN set (set U)
             self.U[s] = self.CalculateKey(s)
@@ -138,9 +139,7 @@ class LPAStar:
         return s, self.U[s]
 
     def CalculateKey(self, s):
-
-        return [min(self.g[s], self.rhs[s]) + self.h(s),
-                min(self.g[s], self.rhs[s])]
+        return [min(self.g[s], self.rhs[s]) + self.h(s), min(self.g[s], self.rhs[s])]
 
     def get_neighbor(self, s):
         """
@@ -233,15 +232,26 @@ class LPAStar:
         plt.plot(self.s_goal[0], self.s_goal[1], "gs")
 
     def plot_visited(self, visited):
-        color = ['gainsboro', 'lightgray', 'silver', 'darkgray',
-                 'bisque', 'navajowhite', 'moccasin', 'wheat',
-                 'powderblue', 'skyblue', 'lightskyblue', 'cornflowerblue']
+        color = [
+            "gainsboro",
+            "lightgray",
+            "silver",
+            "darkgray",
+            "bisque",
+            "navajowhite",
+            "moccasin",
+            "wheat",
+            "powderblue",
+            "skyblue",
+            "lightskyblue",
+            "cornflowerblue",
+        ]
 
         if self.count >= len(color) - 1:
             self.count = 0
 
         for x in visited:
-            plt.plot(x[0], x[1], marker='s', color=color[self.count])
+            plt.plot(x[0], x[1], marker="s", color=color[self.count])
 
 
 def main():
@@ -252,5 +262,5 @@ def main():
     lpastar.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

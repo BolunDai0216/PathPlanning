@@ -3,20 +3,21 @@ A_star 2D
 @author: huiming zhou
 """
 
+import heapq
+import math
 import os
 import sys
-import math
-import heapq
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import plotting, env
+from Search_2D import env, plotting
 
 
 class AStar:
-    """AStar set the cost + heuristics as the priority
-    """
+    """AStar set the cost + heuristics as the priority"""
+
     def __init__(self, s_start, s_goal, heuristic_type):
         self.s_start = s_start
         self.s_goal = s_goal
@@ -41,8 +42,7 @@ class AStar:
         self.PARENT[self.s_start] = self.s_start
         self.g[self.s_start] = 0
         self.g[self.s_goal] = math.inf
-        heapq.heappush(self.OPEN,
-                       (self.f_value(self.s_start), self.s_start))
+        heapq.heappush(self.OPEN, (self.f_value(self.s_start), self.s_start))
 
         while self.OPEN:
             _, s = heapq.heappop(self.OPEN)
@@ -94,8 +94,7 @@ class AStar:
         PARENT = {s_start: s_start}
         OPEN = []
         CLOSED = []
-        heapq.heappush(OPEN,
-                       (g[s_start] + e * self.heuristic(s_start), s_start))
+        heapq.heappush(OPEN, (g[s_start] + e * self.heuristic(s_start), s_start))
 
         while OPEN:
             _, s = heapq.heappop(OPEN)
@@ -221,5 +220,5 @@ def main():
     # plot.animation_ara_star(path, visited, "Repeated A*")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

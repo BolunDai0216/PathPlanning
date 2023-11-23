@@ -3,21 +3,23 @@ DUBINS_RRT_STAR 2D
 @author: huiming zhou
 """
 
-import os
-import sys
 import math
+import os
 import random
-import numpy as np
-import matplotlib.pyplot as plt
+import sys
+
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.spatial.transform import Rotation as Rot
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
-from Sampling_based_Planning.rrt_2D import env, plotting, utils
-import CurvesGenerator.dubins_path as dubins
 import CurvesGenerator.draw as draw
+import CurvesGenerator.dubins_path as dubins
+from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
 
 class Node:
@@ -33,8 +35,20 @@ class Node:
 
 
 class DubinsRRTStar:
-    def __init__(self, sx, sy, syaw, gx, gy, gyaw, vehicle_radius, step_len,
-                 goal_sample_rate, search_radius, iter_max):
+    def __init__(
+        self,
+        sx,
+        sy,
+        syaw,
+        gx,
+        gy,
+        gyaw,
+        vehicle_radius,
+        step_len,
+        goal_sample_rate,
+        search_radius,
+        iter_max,
+    ):
         self.s_start = Node(sx, sy, syaw)
         self.s_goal = Node(gx, gy, gyaw)
         self.vr = vehicle_radius
@@ -59,7 +73,6 @@ class DubinsRRTStar:
         self.path = None
 
     def planning(self):
-
         for i in range(self.iter_max):
             print("Iter:", i, ", number of nodes:", len(self.V))
             rnd = self.Sample()
@@ -83,15 +96,17 @@ class DubinsRRTStar:
         print("get!")
         px = [s[0] for s in path]
         py = [s[1] for s in path]
-        plt.plot(px, py, '-r')
+        plt.plot(px, py, "-r")
         plt.pause(0.01)
         plt.show()
 
     def draw_graph(self, rnd=None):
         plt.cla()
         # for stopping simulation with the esc key.
-        plt.gcf().canvas.mpl_connect('key_release_event',
-                                     lambda event: [exit(0) if event.key == 'escape' else None])
+        plt.gcf().canvas.mpl_connect(
+            "key_release_event",
+            lambda event: [exit(0) if event.key == "escape" else None],
+        )
         for node in self.V:
             if node.parent:
                 plt.plot(node.path_x, node.path_y, "-g")
@@ -112,7 +127,7 @@ class DubinsRRTStar:
         path = [[self.s_goal.x, self.s_goal.y]]
         node = self.V[goal_index]
         while node.parent:
-            for (ix, iy) in zip(reversed(node.path_x), reversed(node.path_y)):
+            for ix, iy in zip(reversed(node.path_x), reversed(node.path_y)):
                 path.append([ix, iy])
             node = node.parent
         path.append([self.s_start.x, self.s_start.y])
@@ -125,7 +140,9 @@ class DubinsRRTStar:
 
     def search_best_goal_node(self):
         dist_to_goal_list = [self.calc_dist_to_goal(n.x, n.y) for n in self.V]
-        goal_inds = [dist_to_goal_list.index(i) for i in dist_to_goal_list if i <= self.step_len]
+        goal_inds = [
+            dist_to_goal_list.index(i) for i in dist_to_goal_list if i <= self.step_len
+        ]
 
         safe_goal_inds = []
         for goal_ind in goal_inds:
@@ -202,7 +219,9 @@ class DubinsRRTStar:
         r = min(self.search_radius * math.sqrt((math.log(n)) / n), self.step_len)
 
         dist_table = [(nd.x - node.x) ** 2 + (nd.y - node.y) ** 2 for nd in nodelist]
-        node_near_ind = [ind for ind in range(len(dist_table)) if dist_table[ind] <= r ** 2]
+        node_near_ind = [
+            ind for ind in range(len(dist_table)) if dist_table[ind] <= r**2
+        ]
 
         return node_near_ind
 
@@ -229,16 +248,19 @@ class DubinsRRTStar:
         delta = self.utils.delta
 
         if random.random() > self.goal_sample_rate:
-            return Node(random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                        random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
-                        random.uniform(-math.pi, math.pi))
+            return Node(
+                random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                random.uniform(-math.pi, math.pi),
+            )
         else:
             return self.s_goal
 
     @staticmethod
     def Nearest(nodelist, n):
-        return nodelist[int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2
-                                       for nd in nodelist]))]
+        return nodelist[
+            int(np.argmin([(nd.x - n.x) ** 2 + (nd.y - n.y) ** 2 for nd in nodelist]))
+        ]
 
     def is_collision(self, node):
         for ox, oy, r in self.obs_circle:
@@ -261,24 +283,17 @@ class DubinsRRTStar:
         draw.Arrow(self.s_goal.x, self.s_goal.y, self.s_goal.yaw, 2.5, "darkorange")
 
     def plot_grid(self, name):
-
-        for (ox, oy, w, h) in self.obs_boundary:
+        for ox, oy, w, h in self.obs_boundary:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='black',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="black", fill=True
                 )
             )
 
-        for (ox, oy, r) in self.obs_circle:
+        for ox, oy, r in self.obs_circle:
             self.ax.add_patch(
                 patches.Circle(
-                    (ox, oy), r,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), r, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
@@ -297,7 +312,7 @@ class DubinsRRTStar:
             [26, 16, 2],
             [37, 10, 3],
             [37, 23, 3],
-            [45, 15, 2]
+            [45, 15, 2],
         ]
 
         return obs_cir
@@ -312,10 +327,21 @@ def main():
     iter_max = 250
     vehicle_radius = 2.0
 
-    drrtstar = DubinsRRTStar(sx, sy, syaw, gx, gy, gyaw, vehicle_radius, step_len,
-                             goal_sample_rate, search_radius, iter_max)
+    drrtstar = DubinsRRTStar(
+        sx,
+        sy,
+        syaw,
+        gx,
+        gy,
+        gyaw,
+        vehicle_radius,
+        step_len,
+        goal_sample_rate,
+        search_radius,
+        iter_max,
+    )
     drrtstar.planning()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

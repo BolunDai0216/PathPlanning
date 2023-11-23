@@ -3,15 +3,16 @@ Bidirectional_a_star 2D
 @author: huiming zhou
 """
 
+import heapq
+import math
 import os
 import sys
-import math
-import heapq
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import plotting, env
+from Search_2D import env, plotting
 
 
 class BidirectionalAStar:
@@ -45,10 +46,8 @@ class BidirectionalAStar:
         self.g_back[self.s_start] = math.inf
         self.PARENT_fore[self.s_start] = self.s_start
         self.PARENT_back[self.s_goal] = self.s_goal
-        heapq.heappush(self.OPEN_fore,
-                       (self.f_value_fore(self.s_start), self.s_start))
-        heapq.heappush(self.OPEN_back,
-                       (self.f_value_back(self.s_goal), self.s_goal))
+        heapq.heappush(self.OPEN_fore, (self.f_value_fore(self.s_start), self.s_start))
+        heapq.heappush(self.OPEN_back, (self.f_value_back(self.s_goal), self.s_goal))
 
     def searching(self):
         """
@@ -78,8 +77,7 @@ class BidirectionalAStar:
                 if new_cost < self.g_fore[s_n]:
                     self.g_fore[s_n] = new_cost
                     self.PARENT_fore[s_n] = s_fore
-                    heapq.heappush(self.OPEN_fore,
-                                   (self.f_value_fore(s_n), s_n))
+                    heapq.heappush(self.OPEN_fore, (self.f_value_fore(s_n), s_n))
 
             # solve backward-search
             _, s_back = heapq.heappop(self.OPEN_back)
@@ -99,8 +97,7 @@ class BidirectionalAStar:
                 if new_cost < self.g_back[s_n]:
                     self.g_back[s_n] = new_cost
                     self.PARENT_back[s_n] = s_back
-                    heapq.heappush(self.OPEN_back,
-                                   (self.f_value_back(s_n), s_n))
+                    heapq.heappush(self.OPEN_back, (self.f_value_back(s_n), s_n))
 
         return self.extract_path(s_meet), self.CLOSED_fore, self.CLOSED_back
 
@@ -222,8 +219,10 @@ def main():
     plot = plotting.Plotting(x_start, x_goal)
 
     path, visited_fore, visited_back = bastar.searching()
-    plot.animation_bi_astar(path, visited_fore, visited_back, "Bidirectional-A*")  # animation
+    plot.animation_bi_astar(
+        path, visited_fore, visited_back, "Bidirectional-A*"
+    )  # animation
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

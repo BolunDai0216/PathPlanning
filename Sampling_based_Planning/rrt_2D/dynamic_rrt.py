@@ -3,16 +3,18 @@ DYNAMIC_RRT_2D
 @author: huiming zhou
 """
 
+import copy
+import math
 import os
 import sys
-import math
-import copy
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
 from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
@@ -33,7 +35,15 @@ class Edge:
 
 
 class DynamicRrt:
-    def __init__(self, s_start, s_goal, step_len, goal_sample_rate, waypoint_sample_rate, iter_max):
+    def __init__(
+        self,
+        s_start,
+        s_goal,
+        step_len,
+        goal_sample_rate,
+        waypoint_sample_rate,
+        iter_max,
+    ):
         self.s_start = Node(s_start)
         self.s_goal = Node(s_goal)
         self.step_len = step_len
@@ -80,7 +90,7 @@ class DynamicRrt:
                     self.plot_path(path)
                     self.path = path
                     self.waypoint = self.extract_waypoint(node_new)
-                    self.fig.canvas.mpl_connect('button_press_event', self.on_press)
+                    self.fig.canvas.mpl_connect("button_press_event", self.on_press)
                     plt.show()
 
                     return
@@ -96,7 +106,9 @@ class DynamicRrt:
             print("Add circle obstacle at: s =", x, ",", "y =", y)
             self.obs_add = [x, y, 2]
             self.obs_circle.append([x, y, 2])
-            self.utils.update_obs(self.obs_circle, self.obs_boundary, self.obs_rectangle)
+            self.utils.update_obs(
+                self.obs_circle, self.obs_boundary, self.obs_rectangle
+            )
             self.InvalidateNodes()
 
             if self.is_path_invalid():
@@ -110,7 +122,7 @@ class DynamicRrt:
                 plt.cla()
                 self.plot_grid("Dynamic_RRT")
                 self.plot_vertex_old()
-                self.plot_path(self.path, color='blue')
+                self.plot_path(self.path, color="blue")
                 self.plot_vertex_new()
                 self.vertex_new = []
                 self.plot_path(path)
@@ -157,7 +169,9 @@ class DynamicRrt:
         self.TrimRRT()
 
         for i in range(self.iter_max):
-            node_rand = self.generate_random_node_replanning(self.goal_sample_rate, self.waypoint_sample_rate)
+            node_rand = self.generate_random_node_replanning(
+                self.goal_sample_rate, self.waypoint_sample_rate
+            )
             node_near = self.nearest_neighbor(self.vertex, node_rand)
             node_new = self.new_state(node_near, node_rand)
 
@@ -187,14 +201,20 @@ class DynamicRrt:
 
         self.vertex = [node for node in self.vertex if node.flag == "VALID"]
         self.vertex_old = copy.deepcopy(self.vertex)
-        self.edges = [Edge(node.parent, node) for node in self.vertex[1:len(self.vertex)]]
+        self.edges = [
+            Edge(node.parent, node) for node in self.vertex[1 : len(self.vertex)]
+        ]
 
     def generate_random_node(self, goal_sample_rate):
         delta = self.utils.delta
 
         if np.random.random() > goal_sample_rate:
-            return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            return Node(
+                (
+                    np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
 
         return self.s_goal
 
@@ -207,20 +227,29 @@ class DynamicRrt:
         elif goal_sample_rate < p < goal_sample_rate + waypoint_sample_rate:
             return self.waypoint[np.random.randint(0, len(self.waypoint) - 1)]
         else:
-            return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            return Node(
+                (
+                    np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
 
     @staticmethod
     def nearest_neighbor(node_list, n):
-        return node_list[int(np.argmin([math.hypot(nd.x - n.x, nd.y - n.y)
-                                        for nd in node_list]))]
+        return node_list[
+            int(np.argmin([math.hypot(nd.x - n.x, nd.y - n.y) for nd in node_list]))
+        ]
 
     def new_state(self, node_start, node_end):
         dist, theta = self.get_distance_and_angle(node_start, node_end)
 
         dist = min(self.step_len, dist)
-        node_new = Node((node_start.x + dist * math.cos(theta),
-                         node_start.y + dist * math.sin(theta)))
+        node_new = Node(
+            (
+                node_start.x + dist * math.cos(theta),
+                node_start.y + dist * math.sin(theta),
+            )
+        )
         node_new.parent = node_start
 
         return node_new
@@ -252,34 +281,24 @@ class DynamicRrt:
         return math.hypot(dx, dy), math.atan2(dy, dx)
 
     def plot_grid(self, name):
-
-        for (ox, oy, w, h) in self.obs_boundary:
+        for ox, oy, w, h in self.obs_boundary:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='black',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="black", fill=True
                 )
             )
 
-        for (ox, oy, w, h) in self.obs_rectangle:
+        for ox, oy, w, h in self.obs_rectangle:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
-        for (ox, oy, r) in self.obs_circle:
+        for ox, oy, r in self.obs_circle:
             self.ax.add_patch(
                 patches.Circle(
-                    (ox, oy), r,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), r, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
@@ -296,9 +315,10 @@ class DynamicRrt:
                 count += 1
                 if node.parent:
                     plt.plot([node.parent.x, node.x], [node.parent.y, node.y], "-g")
-                    plt.gcf().canvas.mpl_connect('key_release_event',
-                                                 lambda event:
-                                                 [exit(0) if event.key == 'escape' else None])
+                    plt.gcf().canvas.mpl_connect(
+                        "key_release_event",
+                        lambda event: [exit(0) if event.key == "escape" else None],
+                    )
                     if count % 10 == 0:
                         plt.pause(0.001)
         else:
@@ -317,15 +337,18 @@ class DynamicRrt:
         for node in self.vertex_new:
             count += 1
             if node.parent:
-                plt.plot([node.parent.x, node.x], [node.parent.y, node.y], color='darkorange')
-                plt.gcf().canvas.mpl_connect('key_release_event',
-                                             lambda event:
-                                             [exit(0) if event.key == 'escape' else None])
+                plt.plot(
+                    [node.parent.x, node.x], [node.parent.y, node.y], color="darkorange"
+                )
+                plt.gcf().canvas.mpl_connect(
+                    "key_release_event",
+                    lambda event: [exit(0) if event.key == "escape" else None],
+                )
                 if count % 10 == 0:
                     plt.pause(0.001)
 
     @staticmethod
-    def plot_path(path, color='red'):
+    def plot_path(path, color="red"):
         plt.plot([x[0] for x in path], [x[1] for x in path], linewidth=2, color=color)
         plt.pause(0.01)
 
@@ -338,5 +361,5 @@ def main():
     drrt.planning()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

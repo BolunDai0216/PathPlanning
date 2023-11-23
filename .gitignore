@@ -149,8 +149,3 @@ dmypy.json
 
 # images
 imgs/
-rosbags/
-# calibration_launch_files/
-
-# MacOS
-.DS_Store

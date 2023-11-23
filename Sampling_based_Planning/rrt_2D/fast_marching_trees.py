@@ -3,16 +3,18 @@ Fast Marching Trees (FMT*)
 @author: huiming zhou
 """
 
-import os
-import sys
 import math
+import os
 import random
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
 from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
@@ -95,7 +97,7 @@ class FMT:
 
         # node_end = self.ChooseGoalPoint()
         path_x, path_y = self.ExtractPath()
-        self.animation(path_x, path_y, Visited[1: len(Visited)])
+        self.animation(path_x, path_y, Visited[1 : len(Visited)])
 
     def ChooseGoalPoint(self):
         Near = self.Near(self.V, self.x_goal, 2.0)
@@ -129,8 +131,11 @@ class FMT:
 
     @staticmethod
     def Near(nodelist, z, rn):
-        return {nd for nd in nodelist
-                if 0 < (nd.x - z.x) ** 2 + (nd.y - z.y) ** 2 <= rn ** 2}
+        return {
+            nd
+            for nd in nodelist
+            if 0 < (nd.x - z.x) ** 2 + (nd.y - z.y) ** 2 <= rn**2
+        }
 
     def SampleFree(self):
         n = self.sample_numbers
@@ -139,8 +144,12 @@ class FMT:
 
         ind = 0
         while ind < n:
-            node = Node((random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            node = Node(
+                (
+                    random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
             if self.utils.is_inside_obs(node):
                 continue
             else:
@@ -153,51 +162,42 @@ class FMT:
         self.plot_grid("Fast Marching Trees (FMT*)")
 
         for node in self.V:
-            plt.plot(node.x, node.y, marker='.', color='lightgrey', markersize=3)
+            plt.plot(node.x, node.y, marker=".", color="lightgrey", markersize=3)
 
         count = 0
         for node in visited:
             count += 1
-            plt.plot([node.x, node.parent.x], [node.y, node.parent.y], '-g')
+            plt.plot([node.x, node.parent.x], [node.y, node.parent.y], "-g")
             plt.gcf().canvas.mpl_connect(
-                'key_release_event',
-                lambda event: [exit(0) if event.key == 'escape' else None])
+                "key_release_event",
+                lambda event: [exit(0) if event.key == "escape" else None],
+            )
             if count % 10 == 0:
                 plt.pause(0.001)
 
-        plt.plot(path_x, path_y, linewidth=2, color='red')
+        plt.plot(path_x, path_y, linewidth=2, color="red")
         plt.pause(0.01)
         plt.show()
 
     def plot_grid(self, name):
-
-        for (ox, oy, w, h) in self.obs_boundary:
+        for ox, oy, w, h in self.obs_boundary:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='black',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="black", fill=True
                 )
             )
 
-        for (ox, oy, w, h) in self.obs_rectangle:
+        for ox, oy, w, h in self.obs_rectangle:
             self.ax.add_patch(
                 patches.Rectangle(
-                    (ox, oy), w, h,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), w, h, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
-        for (ox, oy, r) in self.obs_circle:
+        for ox, oy, r in self.obs_circle:
             self.ax.add_patch(
                 patches.Circle(
-                    (ox, oy), r,
-                    edgecolor='black',
-                    facecolor='gray',
-                    fill=True
+                    (ox, oy), r, edgecolor="black", facecolor="gray", fill=True
                 )
             )
 
@@ -216,5 +216,5 @@ def main():
     fmt.Planning()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -3,13 +3,15 @@ RRT_2D
 @author: huiming zhou
 """
 
+import math
 import os
 import sys
-import math
+
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Sampling_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Sampling_based_Planning/"
+)
 
 from Sampling_based_Planning.rrt_2D import env, plotting, utils
 
@@ -50,7 +52,9 @@ class Rrt:
                 self.vertex.append(node_new)
                 dist, _ = self.get_distance_and_angle(node_new, self.s_goal)
 
-                if dist <= self.step_len and not self.utils.is_collision(node_new, self.s_goal):
+                if dist <= self.step_len and not self.utils.is_collision(
+                    node_new, self.s_goal
+                ):
                     self.new_state(node_new, self.s_goal)
                     return self.extract_path(node_new)
 
@@ -60,22 +64,31 @@ class Rrt:
         delta = self.utils.delta
 
         if np.random.random() > goal_sample_rate:
-            return Node((np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
-                         np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta)))
+            return Node(
+                (
+                    np.random.uniform(self.x_range[0] + delta, self.x_range[1] - delta),
+                    np.random.uniform(self.y_range[0] + delta, self.y_range[1] - delta),
+                )
+            )
 
         return self.s_goal
 
     @staticmethod
     def nearest_neighbor(node_list, n):
-        return node_list[int(np.argmin([math.hypot(nd.x - n.x, nd.y - n.y)
-                                        for nd in node_list]))]
+        return node_list[
+            int(np.argmin([math.hypot(nd.x - n.x, nd.y - n.y) for nd in node_list]))
+        ]
 
     def new_state(self, node_start, node_end):
         dist, theta = self.get_distance_and_angle(node_start, node_end)
 
         dist = min(self.step_len, dist)
-        node_new = Node((node_start.x + dist * math.cos(theta),
-                         node_start.y + dist * math.sin(theta)))
+        node_new = Node(
+            (
+                node_start.x + dist * math.cos(theta),
+                node_start.y + dist * math.sin(theta),
+            )
+        )
         node_new.parent = node_start
 
         return node_new
@@ -110,5 +123,5 @@ def main():
         print("No Path Found!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

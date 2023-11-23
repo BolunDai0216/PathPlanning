@@ -3,15 +3,16 @@ LRTA_star 2D (Learning Real-time A*)
 @author: huiming zhou
 """
 
-import os
-import sys
 import copy
 import math
+import os
+import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../../Search_based_Planning/")
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + "/../../Search_based_Planning/"
+)
 
-from Search_2D import queue, plotting, env
+from Search_2D import env, plotting, queue
 
 
 class LrtAStarN:
@@ -44,7 +45,9 @@ class LrtAStarN:
         s_start = self.s_start  # initialize start node
 
         while True:
-            OPEN, CLOSED = self.AStar(s_start, self.N)  # OPEN, CLOSED sets in each iteration
+            OPEN, CLOSED = self.AStar(
+                s_start, self.N
+            )  # OPEN, CLOSED sets in each iteration
 
             if OPEN == "FOUND":  # reach the goal node
                 self.path.append(CLOSED)
@@ -55,7 +58,9 @@ class LrtAStarN:
             for x in h_value:
                 self.h_table[x] = h_value[x]
 
-            s_start, path_k = self.extract_path_in_CLOSE(s_start, h_value)  # x_init -> expected node in OPEN set
+            s_start, path_k = self.extract_path_in_CLOSE(
+                s_start, h_value
+            )  # x_init -> expected node in OPEN set
             self.path.append(path_k)
 
     def extract_path_in_CLOSE(self, s_start, h_value):
@@ -71,7 +76,9 @@ class LrtAStarN:
                 else:
                     h_list[s_n] = self.h_table[s_n]
 
-            s_key = min(h_list, key=h_list.get)  # move to the smallest node with min h_value
+            s_key = min(
+                h_list, key=h_list.get
+            )  # move to the smallest node with min h_value
             path.append(s_key)  # generate path
             s = s_key  # use end of this iteration as the start of next
 
@@ -222,9 +229,8 @@ def main():
     plot = plotting.Plotting(s_start, s_goal)
 
     lrta.searching()
-    plot.animation_lrta(lrta.path, lrta.visited,
-                        "Learning Real-time A* (LRTA*)")
+    plot.animation_lrta(lrta.path, lrta.visited, "Learning Real-time A* (LRTA*)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
